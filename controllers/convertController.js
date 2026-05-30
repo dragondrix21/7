@@ -107,3 +107,5 @@ exports.download = (req, res) => {
 
   res.download(filePath);
 };
+const ffmpegPath = require('ffmpeg-static');
+ffmpeg.setFfmpegPath(ffmpegPath);
