@@ -3,6 +3,7 @@ const ffmpegPath = require('ffmpeg-static');
 ffmpeg.setFfmpegPath(ffmpegPath);
 const path = require('path');
 const fs = require('fs');
+const fs = require('fs');
 
 // Отправить прогресс клиенту через WebSocket
 function sendProgress(jobId, data) {
