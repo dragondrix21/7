@@ -2,96 +2,1451 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Инструкция по запуску — MediaConvert</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediaConvert — Конвертация аудио и видео онлайн</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
-  body { font-family: Segoe UI, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 20px; background: #f5f7fa; color: #1e293b; }
-  h1 { color: #1e40af; border-bottom: 3px solid #3b82f6; padding-bottom: 10px; }
-  h2 { color: #1e40af; margin-top: 32px; }
-  .step { background: white; border-left: 4px solid #3b82f6; border-radius: 8px; padding: 16px 20px; margin: 12px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-  .step-num { display: inline-block; background: #3b82f6; color: white; border-radius: 50%; width: 28px; height: 28px; text-align: center; line-height: 28px; font-weight: bold; margin-right: 10px; }
-  code { background: #1e293b; color: #7dd3fc; padding: 2px 8px; border-radius: 4px; font-family: Consolas, monospace; font-size: 0.95em; }
-  pre { background: #1e293b; color: #e2e8f0; padding: 16px; border-radius: 8px; font-family: Consolas, monospace; font-size: 0.9em; overflow-x: auto; margin: 10px 0; }
-  .ok { background: #dcfce7; border-left-color: #22c55e; }
-  .warn { background: #fef9c3; border-left-color: #eab308; }
-  a { color: #3b82f6; }
-  .file-tree { background: #1e293b; color: #94a3b8; padding: 16px; border-radius: 8px; font-family: Consolas, monospace; font-size: 0.88em; line-height: 1.7; }
-  .file-tree .folder { color: #fbbf24; }
-  .file-tree .file { color: #86efac; }
+  :root {
+    --bg: #0a0f1a;
+    --bg2: #0f1729;
+    --surface: #151f35;
+    --surface2: #1c2a45;
+    --accent: #3B82F6;
+    --accent2: #60a5fa;
+    --accent-glow: rgba(59,130,246,0.25);
+    --text: #e8edf5;
+    --text-muted: #7a8ba8;
+    --border: rgba(59,130,246,0.15);
+    --success: #22d3a0;
+    --warning: #f59e0b;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* NOISE TEXTURE */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 48px;
+    height: 68px;
+    background: rgba(10,15,26,0.8);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.3rem;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--accent), #6d28d9);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--text); }
+
+  .nav-cta {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .btn-ghost {
+    padding: 8px 20px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .btn-primary {
+    padding: 8px 22px;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent);
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary:hover {
+    background: var(--accent2);
+    box-shadow: 0 0 24px var(--accent-glow);
+  }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 100px 48px 60px;
+    overflow: hidden;
+  }
+
+  .hero-bg-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+  }
+
+  .orb1 {
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(59,130,246,0.18) 0%, transparent 70%);
+    top: -100px;
+    right: -100px;
+    animation: float1 8s ease-in-out infinite;
+  }
+
+  .orb2 {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(109,40,217,0.15) 0%, transparent 70%);
+    bottom: 0;
+    left: -80px;
+    animation: float2 10s ease-in-out infinite;
+  }
+
+  @keyframes float1 {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(-30px, 40px) scale(1.05); }
+  }
+
+  @keyframes float2 {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(20px, -30px) scale(0.95); }
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 640px;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--accent2);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+
+  .badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--success);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.8rem, 5vw, 4.2rem);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    margin-bottom: 24px;
+    color: var(--text);
+  }
+
+  h1 .highlight {
+    background: linear-gradient(135deg, var(--accent) 0%, #818cf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-desc {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    max-width: 500px;
+    line-height: 1.7;
+    margin-bottom: 40px;
+    font-weight: 300;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-large {
+    padding: 14px 32px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.25s;
+    border: none;
+  }
+
+  .btn-large.primary {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 4px 24px rgba(59,130,246,0.35);
+  }
+
+  .btn-large.primary:hover {
+    background: var(--accent2);
+    box-shadow: 0 6px 32px rgba(59,130,246,0.5);
+    transform: translateY(-1px);
+  }
+
+  .btn-large.secondary {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-large.secondary:hover {
+    border-color: var(--accent);
+    background: var(--surface2);
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 40px;
+    margin-top: 56px;
+    padding-top: 40px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.03em;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* CONVERTER CARD */
+  .hero-converter {
+    position: absolute;
+    right: 48px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 420px;
+    animation: fadeUp 0.8s 0.2s ease both;
+    z-index: 2;
+  }
+
+  .converter-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 32px 80px rgba(0,0,0,0.4);
+  }
+
+  .converter-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .drop-zone {
+    border: 2px dashed rgba(59,130,246,0.3);
+    border-radius: 12px;
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+    background: rgba(59,130,246,0.03);
+  }
+
+  .drop-zone::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(59,130,246,0.08) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .drop-zone:hover {
+    border-color: var(--accent);
+    background: rgba(59,130,246,0.06);
+  }
+
+  .drop-zone:hover::before { opacity: 1; }
+
+  .drop-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .drop-zone p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .drop-zone strong {
+    color: var(--accent2);
+    font-weight: 500;
+  }
+
+  .format-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    align-items: center;
+  }
+
+  .format-label {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .format-select {
+    flex: 1;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .format-select:focus { border-color: var(--accent); }
+
+  .convert-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 13px;
+    background: linear-gradient(135deg, var(--accent) 0%, #6d28d9 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .convert-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.1);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .convert-btn:hover::after { opacity: 1; }
+  .convert-btn:hover { box-shadow: 0 8px 30px rgba(59,130,246,0.4); transform: translateY(-1px); }
+
+  .converter-note {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 14px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  /* FORMATS SECTION */
+  .section {
+    padding: 100px 48px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 64px;
+  }
+
+  .section-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    margin-bottom: 16px;
+    line-height: 1.1;
+  }
+
+  .section-sub {
+    font-size: 1rem;
+    color: var(--text-muted);
+    max-width: 520px;
+    margin: 0 auto;
+    font-weight: 300;
+  }
+
+  /* FORMAT TABS */
+  .format-tabs {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+
+  .tab-btn {
+    padding: 8px 22px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .tab-btn.active, .tab-btn:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  .formats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .format-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 14px;
+    text-align: center;
+    transition: all 0.2s;
+    cursor: default;
+  }
+
+  .format-chip:hover {
+    border-color: var(--accent);
+    background: var(--surface2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(59,130,246,0.12);
+  }
+
+  .format-chip .ext {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent2);
+    letter-spacing: 0.02em;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .format-chip .desc {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    line-height: 1.3;
+  }
+
+  /* FEATURES */
+  .features-bg {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .feature-card {
+    background: var(--surface);
+    padding: 40px 32px;
+    transition: background 0.2s;
+  }
+
+  .feature-card:hover { background: var(--surface2); }
+
+  .feature-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(109,40,217,0.2));
+    border: 1px solid rgba(59,130,246,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+  }
+
+  .feature-card h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+  }
+
+  .feature-card p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+    font-weight: 300;
+  }
+
+  /* HOW IT WORKS */
+  .steps-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    max-width: 860px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .steps-row::before {
+    content: '';
+    position: absolute;
+    top: 28px;
+    left: calc(16.5% + 28px);
+    right: calc(16.5% + 28px);
+    height: 1px;
+    background: linear-gradient(90deg, var(--accent) 0%, rgba(59,130,246,0.2) 50%, var(--accent) 100%);
+  }
+
+  .step-card {
+    text-align: center;
+    padding: 0 16px;
+  }
+
+  .step-num {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: var(--accent);
+    margin: 0 auto 20px;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 0 24px var(--accent-glow);
+  }
+
+  .step-card h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .step-card p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* USERS */
+  .users-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .user-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    transition: all 0.25s;
+  }
+
+  .user-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(59,130,246,0.1);
+  }
+
+  .user-role {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .role-guest { background: rgba(34,211,160,0.1); color: var(--success); border: 1px solid rgba(34,211,160,0.2); }
+  .role-user { background: rgba(59,130,246,0.1); color: var(--accent2); border: 1px solid var(--border); }
+  .role-admin { background: rgba(245,158,11,0.1); color: var(--warning); border: 1px solid rgba(245,158,11,0.2); }
+
+  .user-card h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+
+  .user-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .user-features li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  .user-features li::before {
+    content: '→';
+    color: var(--accent);
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    margin-top: 1px;
+  }
+
+  /* TECH STACK */
+  .tech-bg {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .tech-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px 20px;
+    text-align: center;
+    transition: all 0.2s;
+  }
+
+  .tech-card:hover {
+    border-color: var(--accent);
+    background: var(--surface2);
+  }
+
+  .tech-logo {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .tech-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .tech-desc {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  /* COMPARISON */
+  .comparison-table {
+    max-width: 860px;
+    margin: 0 auto;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .comp-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr;
+    background: var(--surface2);
+    padding: 16px 24px;
+    gap: 16px;
+  }
+
+  .comp-header span {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  .comp-header span:first-child { text-align: left; }
+  .comp-header span:last-child { color: var(--accent2); }
+
+  .comp-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr;
+    padding: 16px 24px;
+    gap: 16px;
+    border-top: 1px solid var(--border);
+    align-items: center;
+    transition: background 0.2s;
+  }
+
+  .comp-row:hover { background: var(--surface); }
+
+  .comp-row span {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  .comp-row span:first-child {
+    color: var(--text);
+    text-align: left;
+    font-weight: 500;
+  }
+
+  .check { color: var(--success); font-size: 1.1rem; }
+  .cross { color: #ef4444; font-size: 1.1rem; }
+  .partial { color: var(--warning); font-size: 0.8rem; font-style: italic; }
+
+  /* FOOTER */
+  footer {
+    padding: 48px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: gap;
+  }
+
+  .footer-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+  }
+
+  .footer-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.82rem;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover { color: var(--text); }
+
+  .footer-copy {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  /* Progress demo animation */
+  .progress-demo {
+    margin-top: 12px;
+    display: none;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .progress-bar-wrap {
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent) 0%, #818cf8 100%);
+    border-radius: 2px;
+    transition: width 0.1s linear;
+  }
+
+  /* Mobile responsiveness */
+  @media (max-width: 1100px) {
+    .hero-converter { position: relative; right: auto; top: auto; transform: none; width: 100%; max-width: 420px; margin-top: 60px; }
+    .hero { flex-direction: column; align-items: flex-start; }
+    .hero-content { max-width: 100%; }
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 0 24px; }
+    .nav-links { display: none; }
+    .section { padding: 70px 24px; }
+    .hero { padding: 100px 24px 60px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .steps-row { grid-template-columns: 1fr; }
+    .steps-row::before { display: none; }
+    .users-grid { grid-template-columns: 1fr; }
+    .tech-grid { grid-template-columns: repeat(2, 1fr); }
+    .comp-header, .comp-row { grid-template-columns: 2fr 1fr 1fr 1.2fr; }
+    .comp-header span:nth-child(3), .comp-row span:nth-child(3) { display: none; }
+    footer { flex-direction: column; gap: 24px; text-align: center; }
+  }
 </style>
 </head>
 <body>
 
-<h1>🎵 MediaConvert — Инструкция по запуску</h1>
-<p>Веб-приложение для конвертации аудио и видео через FFmpeg. Проект, НАТК им. Б.С. Галущака, Мандронов Егор.</p>
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="logo-icon">🎵</div>
+    MediaConvert
+  </div>
+  <ul class="nav-links">
+    <li><a href="#formats">Форматы</a></li>
+    <li><a href="#features">Возможности</a></li>
+    <li><a href="#how">Как работает</a></li>
+    <li><a href="#tech">Технологии</a></li>
+  </ul>
+  <div class="nav-cta">
+    <button class="btn-ghost" onclick="showDemo('login')">Войти</button>
+    <button class="btn-primary" onclick="showDemo('reg')">Регистрация</button>
+  </div>
+</nav>
 
-<h2>📋 Что нужно установить</h2>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-orb orb1"></div>
+  <div class="hero-bg-orb orb2"></div>
 
-<div class="step">
-  <span class="step-num">1</span>
-  <strong>Node.js</strong> — скачать на <a href="https://nodejs.org" target="_blank">nodejs.org</a> (версия LTS, 18+)<br>
-  После установки проверить в терминале: <code>node -v</code>
-</div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      Бесплатный онлайн-сервис
+    </div>
+    <h1>Конвертируй<br><span class="highlight">аудио и видео</span><br>прямо в браузере</h1>
+    <p class="hero-desc">Никакой установки, никаких ограничений по количеству конвертаций. Поддержка MP3, WAV, FLAC, MP4, AVI, MKV и ещё десятков форматов.</p>
+    <div class="hero-actions">
+      <button class="btn-large primary" onclick="scrollToConverter()">Начать конвертацию</button>
+      <button class="btn-large secondary" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">Как это работает</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <span class="stat-num">50+</span>
+        <span class="stat-label">Форматов</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">500 МБ</span>
+        <span class="stat-label">Макс. файл</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">0₽</span>
+        <span class="stat-label">Для зарег. пользователей</span>
+      </div>
+    </div>
+  </div>
 
-<div class="step">
-  <span class="step-num">2</span>
-  <strong>FFmpeg</strong> — скачать на <a href="https://ffmpeg.org/download.html" target="_blank">ffmpeg.org</a> или с <a href="https://github.com/BtbN/FFmpeg-Builds/releases" target="_blank">github.com/BtbN/FFmpeg-Builds</a><br><br>
-  Распакуй архив, например в <code>C:\ffmpeg\</code><br><br>
-  Добавь в PATH путь к папке <code>C:\ffmpeg\bin</code>:<br>
-  <em>Пуск → «переменные среды» → Переменные среды → Path → Изменить → Создать → вставить путь → ОК</em><br><br>
-  Проверить: <code>ffmpeg -version</code>
-</div>
+  <div class="hero-converter" id="converter">
+    <div class="converter-card">
+      <h3>🚀 Быстрая конвертация</h3>
+      <div class="drop-zone" id="dropZone" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" onclick="document.getElementById('fileInput').click()">
+        <span class="drop-icon">📂</span>
+        <p><strong>Перетащите файл</strong> или нажмите для выбора<br><small>Аудио и видео до 500 МБ</small></p>
+        <input type="file" id="fileInput" style="display:none" accept="audio/*,video/*" onchange="handleFile(this)">
+      </div>
+      <div class="format-row">
+        <span class="format-label">Формат:</span>
+        <select class="format-select" id="formatSelect">
+          <optgroup label="Аудио">
+            <option>MP3</option>
+            <option>WAV</option>
+            <option>FLAC</option>
+            <option>AAC</option>
+            <option>OGG</option>
+          </optgroup>
+          <optgroup label="Видео">
+            <option>MP4</option>
+            <option>AVI</option>
+            <option>MKV</option>
+            <option>MOV</option>
+            <option>WebM</option>
+          </optgroup>
+        </select>
+      </div>
+      <button class="convert-btn" id="convertBtn" onclick="startDemo()">
+        ⚡ Конвертировать
+      </button>
+      <div class="progress-demo" id="progressDemo">
+        <div class="progress-label">
+          <span id="progressText">Обработка...</span>
+          <span id="progressPct">0%</span>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+      </div>
+      <div class="converter-note">
+        🔒 Файлы удаляются с сервера через 48 часов
+      </div>
+    </div>
+  </div>
+</section>
 
-<h2>🚀 Запуск проекта</h2>
+<!-- FORMATS -->
+<section class="section" id="formats">
+  <div class="section-header">
+    <span class="section-tag">Форматы</span>
+    <h2>Поддерживаемые форматы</h2>
+    <p class="section-sub">Конвертируй между самыми популярными аудио и видеоформатами без потери качества</p>
+  </div>
 
-<div class="step">
-  <span class="step-num">3</span>
-  Открой папку <strong>mediaconvert</strong> в терминале (Shift+ПКМ → «Открыть окно PowerShell здесь»)
-</div>
+  <div class="format-tabs">
+    <button class="tab-btn active" onclick="filterFormats('audio', this)">🎵 Аудио</button>
+    <button class="tab-btn" onclick="filterFormats('video', this)">🎬 Видео</button>
+  </div>
 
-<div class="step">
-  <span class="step-num">4</span>
-  Установи зависимости (только один раз):
-  <pre>npm install</pre>
-</div>
+  <div class="formats-grid" id="formatsGrid">
+    <div class="format-chip" data-type="audio">
+      <span class="ext">MP3</span>
+      <span class="desc">Универсальный аудиоформат</span>
+    </div>
+    <div class="format-chip" data-type="audio">
+      <span class="ext">WAV</span>
+      <span class="desc">Несжатый PCM-звук</span>
+    </div>
+    <div class="format-chip" data-type="audio">
+      <span class="ext">FLAC</span>
+      <span class="desc">Без потерь, высокое качество</span>
+    </div>
+    <div class="format-chip" data-type="audio">
+      <span class="ext">AAC</span>
+      <span class="desc">Стандарт Apple и YouTube</span>
+    </div>
+    <div class="format-chip" data-type="audio">
+      <span class="ext">OGG</span>
+      <span class="desc">Открытый формат Vorbis</span>
+    </div>
+    <div class="format-chip" data-type="audio">
+      <span class="ext">M4A</span>
+      <span class="desc">Аудио контейнер MPEG-4</span>
+    </div>
+    <div class="format-chip" data-type="video" style="display:none">
+      <span class="ext">MP4</span>
+      <span class="desc">Стандарт для видео</span>
+    </div>
+    <div class="format-chip" data-type="video" style="display:none">
+      <span class="ext">AVI</span>
+      <span class="desc">Классический формат Windows</span>
+    </div>
+    <div class="format-chip" data-type="video" style="display:none">
+      <span class="ext">MKV</span>
+      <span class="desc">Контейнер Matroska</span>
+    </div>
+    <div class="format-chip" data-type="video" style="display:none">
+      <span class="ext">MOV</span>
+      <span class="desc">Формат Apple QuickTime</span>
+    </div>
+    <div class="format-chip" data-type="video" style="display:none">
+      <span class="ext">WebM</span>
+      <span class="desc">Оптимизирован для веба</span>
+    </div>
+    <div class="format-chip" data-type="video" style="display:none">
+      <span class="ext">WMV</span>
+      <span class="desc">Windows Media Video</span>
+    </div>
+  </div>
+</section>
 
-<div class="step">
-  <span class="step-num">5</span>
-  Запусти сервер:
-  <pre>npm start</pre>
-</div>
+<!-- FEATURES -->
+<section class="section features-bg" id="features">
+  <div class="section-header">
+    <span class="section-tag">Возможности</span>
+    <h2>Всё что нужно<br>для работы с медиа</h2>
+    <p class="section-sub">Современный веб-сервис без ограничений коммерческих аналогов</p>
+  </div>
 
-<div class="step ok">
-  <span class="step-num">6</span>
-  Открой в браузере: <strong><a href="http://localhost:3000" target="_blank">http://localhost:3000</a></strong><br>
-  Сайт должен открыться и работать!
-</div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <h4>Быстрая конвертация</h4>
+      <p>Серверная обработка на базе FFmpeg с поддержкой очереди задач. Конвертация тяжёлых файлов не блокирует интерфейс.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎛️</div>
+      <h4>Гибкие параметры</h4>
+      <p>Настройка битрейта, частоты дискретизации и разрешения видео. Расширенные параметры для опытных пользователей.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📁</div>
+      <h4>История конвертаций</h4>
+      <p>Зарегистрированные пользователи видят все свои конвертации и могут повторно скачать файлы в течение 48 часов.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📡</div>
+      <h4>Прогресс в реальном времени</h4>
+      <p>WebSocket-соединение обеспечивает обновление прогресс-бара в режиме реального времени без перезагрузки страницы.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔐</div>
+      <h4>Безопасность данных</h4>
+      <p>Пароли хешируются через bcrypt. Файлы автоматически удаляются с сервера после истечения срока хранения.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🖥️</div>
+      <h4>Адаптивный интерфейс</h4>
+      <p>Drag-and-drop загрузка файлов, кастомные компоненты select с поиском, аккордеон параметров. Работает с любого устройства.</p>
+    </div>
+  </div>
+</section>
 
-<h2>📁 Структура проекта</h2>
-<div class="file-tree">
-<span class="folder">mediaconvert/</span><br>
-├── <span class="file">server.js</span>              — главный сервер (HTTP + WebSocket)<br>
-├── <span class="file">package.json</span>           — список зависимостей<br>
-├── <span class="folder">routes/</span><br>
-│   └── <span class="file">convert.js</span>         — маршруты API<br>
-├── <span class="folder">controllers/</span><br>
-│   └── <span class="file">convertController.js</span> — конвертация через FFmpeg<br>
-├── <span class="folder">public/</span><br>
-│   └── <span class="file">index.html</span>         — весь фронтенд сайта<br>
-├── <span class="folder">uploads/</span>             — сюда попадают загруженные файлы<br>
-└── <span class="folder">converted/</span>           — сюда сохраняются результаты
-</div>
+<!-- HOW IT WORKS -->
+<section class="section" id="how">
+  <div class="section-header">
+    <span class="section-tag">Инструкция</span>
+    <h2>Три шага до результата</h2>
+    <p class="section-sub">Конвертация без регистрации за считанные секунды</p>
+  </div>
 
-<h2>⚠️ Частые проблемы</h2>
+  <div class="steps-row">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <h4>Загрузите файл</h4>
+      <p>Перетащите аудио или видеофайл в зону загрузки или нажмите для выбора. Поддерживаются файлы до 500 МБ.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <h4>Выберите формат</h4>
+      <p>Выберите целевой формат из списка. При необходимости настройте параметры: битрейт, качество, разрешение.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <h4>Скачайте результат</h4>
+      <p>Дождитесь завершения конвертации и скачайте готовый файл. Зарегистрированные пользователи сохраняют историю.</p>
+    </div>
+  </div>
+</section>
 
-<div class="step warn">
-  <strong>«ffmpeg is not recognized»</strong> — FFmpeg не добавлен в PATH. Перезапусти терминал после добавления.
-</div>
-<div class="step warn">
-  <strong>«Cannot find module»</strong> — не выполнен <code>npm install</code>. Запусти его.
-</div>
-<div class="step warn">
-  <strong>Порт 3000 занят</strong> — измени порт в <code>server.js</code> последняя строка: <code>const PORT = 3001</code>
-</div>
+<!-- USER ROLES -->
+<section class="section tech-bg">
+  <div class="section-header">
+    <span class="section-tag">Пользователи</span>
+    <h2>Роли и возможности</h2>
+    <p class="section-sub">Три уровня доступа для разных задач</p>
+  </div>
 
+  <div class="users-grid">
+    <div class="user-card">
+      <span class="user-role role-guest">👤 Гость</span>
+      <h4>Базовая конвертация</h4>
+      <ul class="user-features">
+        <li>Загрузка медиафайла на сервер</li>
+        <li>Выбор целевого формата</li>
+        <li>Скачивание результата</li>
+        <li>Просмотр поддерживаемых форматов</li>
+      </ul>
+    </div>
+    <div class="user-card">
+      <span class="user-role role-user">🔵 Пользователь</span>
+      <h4>Расширенные функции</h4>
+      <ul class="user-features">
+        <li>Все возможности гостя</li>
+        <li>История всех конвертаций</li>
+        <li>Повторное скачивание файлов</li>
+        <li>Управление профилем</li>
+        <li>Расширенные параметры (битрейт, частота, разрешение)</li>
+      </ul>
+    </div>
+    <div class="user-card">
+      <span class="user-role role-admin">⚙️ Администратор</span>
+      <h4>Управление сервисом</h4>
+      <ul class="user-features">
+        <li>Управление пользователями и правами</li>
+        <li>Мониторинг очереди задач</li>
+        <li>Контроль дискового пространства</li>
+        <li>Добавление/удаление форматов</li>
+        <li>Настройки хранения файлов</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- TECH STACK -->
+<section class="section" id="tech">
+  <div class="section-header">
+    <span class="section-tag">Технологии</span>
+    <h2>Стек технологий</h2>
+    <p class="section-sub">Современные инструменты для производительного и надёжного сервиса</p>
+  </div>
+
+  <div class="tech-grid">
+    <div class="tech-card">
+      <span class="tech-logo">⚙️</span>
+      <div class="tech-name">Node.js</div>
+      <div class="tech-desc">Асинхронный серверный JavaScript</div>
+    </div>
+    <div class="tech-card">
+      <span class="tech-logo">🚀</span>
+      <div class="tech-name">Express.js</div>
+      <div class="tech-desc">Маршрутизация REST API</div>
+    </div>
+    <div class="tech-card">
+      <span class="tech-logo">🎬</span>
+      <div class="tech-name">FFmpeg</div>
+      <div class="tech-desc">Ядро конвертации медиафайлов</div>
+    </div>
+    <div class="tech-card">
+      <span class="tech-logo">🗄️</span>
+      <div class="tech-name">MySQL</div>
+      <div class="tech-desc">Хранение пользователей и задач</div>
+    </div>
+    <div class="tech-card">
+      <span class="tech-logo">📤</span>
+      <div class="tech-name">Multer</div>
+      <div class="tech-desc">Обработка загрузки файлов</div>
+    </div>
+    <div class="tech-card">
+      <span class="tech-logo">🔌</span>
+      <div class="tech-name">WebSocket</div>
+      <div class="tech-desc">Прогресс конвертации реального времени</div>
+    </div>
+    <div class="tech-card">
+      <span class="tech-logo">🔐</span>
+      <div class="tech-name">bcrypt</div>
+      <div class="tech-desc">Безопасное хеширование паролей</div>
+    </div>
+    <div class="tech-card">
+      <span class="tech-logo">🎨</span>
+      <div class="tech-name">SCSS</div>
+      <div class="tech-desc">Препроцессор CSS-стилей</div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section class="section tech-bg">
+  <div class="section-header">
+    <span class="section-tag">Сравнение</span>
+    <h2>Мы vs аналоги</h2>
+    <p class="section-sub">Сравнение с популярными онлайн-сервисами конвертации</p>
+  </div>
+
+  <div class="comparison-table">
+    <div class="comp-header">
+      <span>Функция</span>
+      <span>Convertio</span>
+      <span>CloudConvert</span>
+      <span>Online-Convert</span>
+      <span>✦ MediaConvert</span>
+    </div>
+    <div class="comp-row">
+      <span>Без ограничений конвертаций</span>
+      <span class="cross">✗</span>
+      <span class="cross">✗</span>
+      <span class="cross">✗</span>
+      <span class="check">✓</span>
+    </div>
+    <div class="comp-row">
+      <span>Файлы до 500 МБ</span>
+      <span class="partial">25 МБ</span>
+      <span class="partial">100 МБ</span>
+      <span class="partial">100 МБ</span>
+      <span class="check">✓</span>
+    </div>
+    <div class="comp-row">
+      <span>История конвертаций</span>
+      <span class="partial">Платно</span>
+      <span class="partial">Платно</span>
+      <span class="cross">✗</span>
+      <span class="check">✓</span>
+    </div>
+    <div class="comp-row">
+      <span>Без рекламы</span>
+      <span class="partial">Частично</span>
+      <span class="check">✓</span>
+      <span class="cross">✗</span>
+      <span class="check">✓</span>
+    </div>
+    <div class="comp-row">
+      <span>Настройка битрейта / разрешения</span>
+      <span class="partial">Платно</span>
+      <span class="check">✓</span>
+      <span class="partial">Частично</span>
+      <span class="check">✓</span>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">🎵 MediaConvert</div>
+  <ul class="footer-links">
+    <li><a href="#">О проекте</a></li>
+    <li><a href="#">Политика конфиденциальности</a></li>
+    <li><a href="#">Условия использования</a></li>
+    <li><a href="#">Контакты</a></li>
+  </ul>
+  <span class="footer-copy">© 2026 · ГБПОУ НСО «НАТК им. Б.С. Галущака»</span>
+</footer>
+
+<script>
+  // Drag & drop handlers
+  function handleDragOver(e) {
+    e.preventDefault();
+    document.getElementById('dropZone').style.borderColor = '#3B82F6';
+    document.getElementById('dropZone').style.background = 'rgba(59,130,246,0.08)';
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file) updateDropZone(file);
+  }
+
+  function handleFile(input) {
+    if (input.files[0]) updateDropZone(input.files[0]);
+  }
+
+  function updateDropZone(file) {
+    const dz = document.getElementById('dropZone');
+    const sizeMB = (file.size / 1024 / 1024).toFixed(1);
+    dz.innerHTML = `
+      <span class="drop-icon">✅</span>
+      <p><strong>${file.name}</strong><br><small>${sizeMB} МБ — готов к конвертации</small></p>
+    `;
+    dz.style.borderColor = '#22d3a0';
+    dz.style.background = 'rgba(34,211,160,0.05)';
+  }
+
+  // Demo progress animation
+  function startDemo() {
+    const demo = document.getElementById('progressDemo');
+    const fill = document.getElementById('progressFill');
+    const pct = document.getElementById('progressPct');
+    const text = document.getElementById('progressText');
+    const btn = document.getElementById('convertBtn');
+
+    demo.style.display = 'block';
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+    btn.textContent = 'Обработка...';
+
+    let progress = 0;
+    const messages = ['Загрузка файла...', 'Обработка FFmpeg...', 'Конвертация...', 'Финализация...', 'Готово!'];
+    const interval = setInterval(() => {
+      progress += Math.random() * 6 + 2;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(interval);
+        fill.style.width = '100%';
+        pct.textContent = '100%';
+        text.textContent = '✅ Готово! Файл доступен для скачивания';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.textContent = '⬇️ Скачать файл';
+        btn.style.background = 'linear-gradient(135deg, #22d3a0 0%, #059669 100%)';
+        btn.onclick = () => alert('В реальном приложении здесь начнётся скачивание файла!');
+        return;
+      }
+      fill.style.width = progress + '%';
+      pct.textContent = Math.round(progress) + '%';
+      const msgIdx = Math.min(Math.floor(progress / 25), messages.length - 2);
+      text.textContent = messages[msgIdx];
+    }, 80);
+  }
+
+  function scrollToConverter() {
+    document.getElementById('converter').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function showDemo(type) {
+    const msg = type === 'login'
+      ? 'Форма входа в личный кабинет\n\n(В финальной версии здесь откроется модальное окно авторизации)'
+      : 'Форма регистрации\n\n(В финальной версии здесь откроется модальное окно регистрации)';
+    alert(msg);
+  }
+
+  // Format filter
+  function filterFormats(type, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.format-chip').forEach(chip => {
+      chip.style.display = chip.dataset.type === type ? '' : 'none';
+    });
+  }
+
+  // Animate on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.feature-card, .step-card, .user-card, .tech-card, .format-chip').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    observer.observe(el);
+  });
+</script>
 </body>
 </html>
