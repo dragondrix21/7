@@ -4,6 +4,9 @@ const WebSocket = require('ws');
 const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
+const ffmpeg = require('fluent-ffmpeg');
+const ffmpegPath = require('ffmpeg-static');
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 const convertRouter = require('./routes/convert');
 
