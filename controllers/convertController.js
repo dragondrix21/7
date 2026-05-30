@@ -3,7 +3,7 @@ const ffmpegPath = require('ffmpeg-static');
 ffmpeg.setFfmpegPath(ffmpegPath);
 const path = require('path');
 const fs = require('fs');
-const { v4: uuidv4 } = require('uuid');
+...
 
 // Отправить прогресс клиенту через WebSocket
 function sendProgress(jobId, data) {
@@ -107,5 +107,3 @@ exports.download = (req, res) => {
 
   res.download(filePath);
 };
-const ffmpegPath = require('ffmpeg-static');
-ffmpeg.setFfmpegPath(ffmpegPath);
