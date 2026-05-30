@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Инструкция по запуску — MediaConvert</title>
+<style>
+  body { font-family: Segoe UI, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 20px; background: #f5f7fa; color: #1e293b; }
+  h1 { color: #1e40af; border-bottom: 3px solid #3b82f6; padding-bottom: 10px; }
+  h2 { color: #1e40af; margin-top: 32px; }
+  .step { background: white; border-left: 4px solid #3b82f6; border-radius: 8px; padding: 16px 20px; margin: 12px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .step-num { display: inline-block; background: #3b82f6; color: white; border-radius: 50%; width: 28px; height: 28px; text-align: center; line-height: 28px; font-weight: bold; margin-right: 10px; }
+  code { background: #1e293b; color: #7dd3fc; padding: 2px 8px; border-radius: 4px; font-family: Consolas, monospace; font-size: 0.95em; }
+  pre { background: #1e293b; color: #e2e8f0; padding: 16px; border-radius: 8px; font-family: Consolas, monospace; font-size: 0.9em; overflow-x: auto; margin: 10px 0; }
+  .ok { background: #dcfce7; border-left-color: #22c55e; }
+  .warn { background: #fef9c3; border-left-color: #eab308; }
+  a { color: #3b82f6; }
+  .file-tree { background: #1e293b; color: #94a3b8; padding: 16px; border-radius: 8px; font-family: Consolas, monospace; font-size: 0.88em; line-height: 1.7; }
+  .file-tree .folder { color: #fbbf24; }
+  .file-tree .file { color: #86efac; }
+</style>
+</head>
+<body>
+
+<h1>🎵 MediaConvert — Инструкция по запуску</h1>
+<p>Веб-приложение для конвертации аудио и видео через FFmpeg. Проект, НАТК им. Б.С. Галущака, Мандронов Егор.</p>
+
+<h2>📋 Что нужно установить</h2>
+
+<div class="step">
+  <span class="step-num">1</span>
+  <strong>Node.js</strong> — скачать на <a href="https://nodejs.org" target="_blank">nodejs.org</a> (версия LTS, 18+)<br>
+  После установки проверить в терминале: <code>node -v</code>
+</div>
+
+<div class="step">
+  <span class="step-num">2</span>
+  <strong>FFmpeg</strong> — скачать на <a href="https://ffmpeg.org/download.html" target="_blank">ffmpeg.org</a> или с <a href="https://github.com/BtbN/FFmpeg-Builds/releases" target="_blank">github.com/BtbN/FFmpeg-Builds</a><br><br>
+  Распакуй архив, например в <code>C:\ffmpeg\</code><br><br>
+  Добавь в PATH путь к папке <code>C:\ffmpeg\bin</code>:<br>
+  <em>Пуск → «переменные среды» → Переменные среды → Path → Изменить → Создать → вставить путь → ОК</em><br><br>
+  Проверить: <code>ffmpeg -version</code>
+</div>
+
+<h2>🚀 Запуск проекта</h2>
+
+<div class="step">
+  <span class="step-num">3</span>
+  Открой папку <strong>mediaconvert</strong> в терминале (Shift+ПКМ → «Открыть окно PowerShell здесь»)
+</div>
+
+<div class="step">
+  <span class="step-num">4</span>
+  Установи зависимости (только один раз):
+  <pre>npm install</pre>
+</div>
+
+<div class="step">
+  <span class="step-num">5</span>
+  Запусти сервер:
+  <pre>npm start</pre>
+</div>
+
+<div class="step ok">
+  <span class="step-num">6</span>
+  Открой в браузере: <strong><a href="http://localhost:3000" target="_blank">http://localhost:3000</a></strong><br>
+  Сайт должен открыться и работать!
+</div>
+
+<h2>📁 Структура проекта</h2>
+<div class="file-tree">
+<span class="folder">mediaconvert/</span><br>
+├── <span class="file">server.js</span>              — главный сервер (HTTP + WebSocket)<br>
+├── <span class="file">package.json</span>           — список зависимостей<br>
+├── <span class="folder">routes/</span><br>
+│   └── <span class="file">convert.js</span>         — маршруты API<br>
+├── <span class="folder">controllers/</span><br>
+│   └── <span class="file">convertController.js</span> — конвертация через FFmpeg<br>
+├── <span class="folder">public/</span><br>
+│   └── <span class="file">index.html</span>         — весь фронтенд сайта<br>
+├── <span class="folder">uploads/</span>             — сюда попадают загруженные файлы<br>
+└── <span class="folder">converted/</span>           — сюда сохраняются результаты
+</div>
+
+<h2>⚠️ Частые проблемы</h2>
+
+<div class="step warn">
+  <strong>«ffmpeg is not recognized»</strong> — FFmpeg не добавлен в PATH. Перезапусти терминал после добавления.
+</div>
+<div class="step warn">
+  <strong>«Cannot find module»</strong> — не выполнен <code>npm install</code>. Запусти его.
+</div>
+<div class="step warn">
+  <strong>Порт 3000 занят</strong> — измени порт в <code>server.js</code> последняя строка: <code>const PORT = 3001</code>
+</div>
+
+</body>
+</html>
